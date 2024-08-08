@@ -212,6 +212,24 @@ def create_tables(conn):
         
         # Insert car models into the table
         c.executemany('INSERT INTO car_models (brand, model) VALUES (?, ?)', car_models)
+        
+        # Insert statements
+        parking_slots = [
+            "INSERT INTO ParkingSlots (slot_number, status) VALUES (1, 'available')",
+            "INSERT INTO ParkingSlots (slot_number, status) VALUES (2, 'available')",
+            "INSERT INTO ParkingSlots (slot_number, status) VALUES (3, 'available')",
+            "INSERT INTO ParkingSlots (slot_number, status) VALUES (4, 'available')",
+            "INSERT INTO ParkingSlots (slot_number, status) VALUES (5, 'available')",
+            "INSERT INTO ParkingSlots (slot_number, status) VALUES (6, 'available')",
+            "INSERT INTO ParkingSlots (slot_number, status) VALUES (7, 'available')",
+            "INSERT INTO ParkingSlots (slot_number, status) VALUES (8, 'available')",
+            "INSERT INTO ParkingSlots (slot_number, status) VALUES (9, 'available')",
+            "INSERT INTO ParkingSlots (slot_number, status) VALUES (10, 'available')"
+        ]
+
+        # Execute each insert statement
+        for slots in parking_slots:
+            cur.execute(slots)
 
         conn.commit()
         print("Tables created successfully.")
