@@ -747,7 +747,7 @@ elif selected_tab == "CheckIN/OUT":
             if license_plate and vehicle_type and owner_gender and vehicle_image:
             
                 # Save the image to disk
-                image_path = f"vehicle_images/{plate_number}.png"
+                image_path = f"vehicle_images/{license_plate}.png"
                 os.makedirs("vehicle_images", exist_ok=True)
                 with open(image_path, "wb") as f:
                     f.write(vehicle_image.getvalue())
