@@ -750,7 +750,7 @@ elif selected_tab == "CheckIN/OUT":
                 image_path = f"vehicle_images/{plate_number}.png"
                 os.makedirs("vehicle_images", exist_ok=True)
                 with open(image_path, "wb") as f:
-                    f.write(vehicle_image.getvalue
+                    f.write(vehicle_image.getvalue())
                     
                 insert_vehicle_and_checkin(conn, license_plate, vehicle_type, owner_gender,passengers, image_path)
                 
