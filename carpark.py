@@ -634,13 +634,26 @@ if selected_tab == "Dashboard":
     # Example Chart
     st.markdown('<p class="big-font">Check-INs Over Time</p>', unsafe_allow_html=True)
     if not checked_in_vehicles.empty:
-        checked_in_vehicles['checkin_time'] = pd.to_datetime(checked_in_vehicles['checkin_time'])
-        checkin_chart = alt.Chart(checked_in_vehicles).mark_bar().encode(
-            x='yearmonthdate(checkin_time):T',
-            y='count()',
-            tooltip=['checkin_time', 'count()']
-        ).interactive()
-        st.altair_chart(checkin_chart, use_container_width=True)
+        checked_in_vehicles['check_in_date'] = pd.to_datetime(checked_in_vehicles['checkin_time']).dt.date
+        # Group by date to get the number of check-ins per day
+        daily_checkins = checked_in_vehicles.groupby('check_in_date').size().reset_index(name='checkins')
+        # Create the Altair bar chart
+        chart = alt.Chart(daily_checkins).mark_bar().encode(
+            x=alt.X('check_in_date:T', title='Date'),
+            y=alt.Y('checkins:Q', title='Number of Check-Ins'),
+            tooltip=['check_in_date', 'checkins']
+        ).properties(
+            title='Daily Vehicle Check-Ins',
+            width=600,
+            height=400
+        ).configure_axis(
+            grid=False
+        ).configure_title(
+            fontSize=20,
+            anchor='start',
+            color='gray'
+        )
+        st.altair_chart(chart, use_container_width=True)
     # Example Chart: Heatmap for Check-Ins by Hour and Day
     st.markdown('<p class="big-font">Check-Ins by Hour and Day</p>', unsafe_allow_html=True)
     if not checked_in_vehicles.empty:
