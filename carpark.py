@@ -267,7 +267,7 @@ def insert_vehicle_and_checkin(conn, license_plate, vehicle_type, owner_gender, 
         vehicle = c.fetchone()
         if not vehicle:
             # Insert the vehicle into the Vehicles table
-            c.execute("INSERT INTO Vehicles (license_plate, vehicle_type, image_path) VALUES (?, ?)", (license_plate, vehicle_type, image_path))
+            c.execute("INSERT INTO Vehicles (license_plate, vehicle_type, image_path) VALUES (?, ?, ?)", (license_plate, vehicle_type, image_path))
             conn.commit()
             st.success(f"Vehicle with license plate {license_plate} added to the database.")
         else:
