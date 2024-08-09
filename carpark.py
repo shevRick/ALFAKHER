@@ -229,7 +229,7 @@ def create_tables(conn):
 
         # Execute each insert statement
         for slots in parking_slots:
-            cur.execute(slots)
+            c.execute(slots)
 
         conn.commit()
         print("Tables created successfully.")
