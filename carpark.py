@@ -657,6 +657,7 @@ if selected_tab == "Dashboard":
     # Example Chart: Heatmap for Check-Ins by Hour and Day
     st.markdown('<p class="big-font">Check-Ins by Hour and Day</p>', unsafe_allow_html=True)
     if not checked_in_vehicles.empty:
+        checked_in_vehicles['checkin_time'] = pd.to_datetime(checked_in_vehicles['checkin_time'])
         checked_in_vehicles['hour'] = checked_in_vehicles['checkin_time'].dt.hour
         checked_in_vehicles['day'] = checked_in_vehicles['checkin_time'].dt.day_name()
         heatmap = alt.Chart(checked_in_vehicles).mark_rect().encode(
