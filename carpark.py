@@ -35,7 +35,8 @@ def create_tables(conn):
         CREATE TABLE IF NOT EXISTS Vehicles (
             id INTEGER PRIMARY KEY,
             license_plate TEXT UNIQUE,
-            vehicle_type TEXT
+            vehicle_type TEXT,
+            image_path TEXT
         )
         ''')
         
@@ -258,7 +259,7 @@ def insert_transaction(conn, vehicle_id, slot_id, entry_time):
     conn.close()
         
 # Function to insert a vehicle into the database
-def insert_vehicle_and_checkin(conn, license_plate, vehicle_type, owner_gender, passengers):
+def insert_vehicle_and_checkin(conn, license_plate, vehicle_type, owner_gender, passengers, image_path):
     try:
         c = conn.cursor()
         # Check if the vehicle already exists
@@ -266,7 +267,7 @@ def insert_vehicle_and_checkin(conn, license_plate, vehicle_type, owner_gender, 
         vehicle = c.fetchone()
         if not vehicle:
             # Insert the vehicle into the Vehicles table
-            c.execute("INSERT INTO Vehicles (license_plate, vehicle_type) VALUES (?, ?)", (license_plate, vehicle_type))
+            c.execute("INSERT INTO Vehicles (license_plate, vehicle_type, image_path) VALUES (?, ?)", (license_plate, vehicle_type, image_path))
             conn.commit()
             st.success(f"Vehicle with license plate {license_plate} added to the database.")
         else:
@@ -739,10 +740,19 @@ elif selected_tab == "CheckIN/OUT":
         vehicle_type = st.selectbox("Vehicle Model:", get_model(conn))
         owner_gender = st.selectbox("Driver Gender:", ["Male", "Female"])
         passengers = st.selectbox("Passengers:", ["Y", "N"])
+        # Capture image from camera
+        vehicle_image = st.camera_input("Take a picture of the vehicle")
         
         if st.button('Check-IN'):
-            if license_plate and vehicle_type and owner_gender:
-                insert_vehicle_and_checkin(conn, license_plate, vehicle_type, owner_gender,passengers)
+            if license_plate and vehicle_type and owner_gender and vehicle_image:
+            
+                # Save the image to disk
+                image_path = f"vehicle_images/{plate_number}.png"
+                os.makedirs("vehicle_images", exist_ok=True)
+                with open(image_path, "wb") as f:
+                    f.write(vehicle_image.getvalue
+                    
+                insert_vehicle_and_checkin(conn, license_plate, vehicle_type, owner_gender,passengers, image_path)
                 
             else:
                 st.error("Please fill out all fields.")
