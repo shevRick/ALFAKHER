@@ -17,6 +17,7 @@ LOCAL_TZ = pytz.timezone('Africa/Nairobi')
 path = os.getcwd()
 db_file = os.path.join(path, 'car_park_management.db')
 
+
 def create_connection(db_file):
     conn = None
     try:
@@ -102,6 +103,13 @@ def create_tables(conn):
             slot_number INTEGER NOT NULL,
             reserved_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             status TEXT DEFAULT 'active'
+        )
+        ''')
+        
+        c.execute('''
+        CREATE TABLE IF NOT EXISTS ParkingSlots (
+            slot_number INTEGER PRIMARY KEY,
+            status TEXT DEFAULT 'available' -- 'available' or 'occupied'
         )
         ''')
         
@@ -325,7 +333,7 @@ def get_vehicle_details(conn, vehicle):
         return pd.DataFrame()  # Return an empty DataFrame on error
         
    
-    conn.close()
+    
 
 def update_vehicle_checkout(conn, license_plate):
     try:
@@ -348,7 +356,7 @@ def update_vehicle_checkout(conn, license_plate):
     except Exception as e:
         st.error(str(e))
         
-        
+      
 def get_model(conn):
     try:
         c = conn.cursor()
@@ -358,7 +366,8 @@ def get_model(conn):
         return names
     except Error as e:
         print(e)
-    conn.close()
+   
+    
 def delete_model(conn, id):
     try:
         c = conn.cursor()
@@ -366,7 +375,7 @@ def delete_model(conn, id):
         conn.commit()
     except Error as e:
         print(e) 
-    conn.close()
+    
     
 def export_vehicles_to_csv(conn):
   try:
@@ -375,8 +384,7 @@ def export_vehicles_to_csv(conn):
       
   except Error as e:
       print(e)
-  conn.close()
-
+ 
 
 # Function to add a parking reservation to the database
 def add_reservation(conn, license_plate, reservation_start, reservation_end, slot_number):
@@ -520,6 +528,7 @@ if 'slot_number' not in st.session_state:
     st.session_state['slot_number'] = None
     
 conn = create_connection(db_file)
+
 create_tables(conn)
 
 ## Config streamlit page
@@ -713,7 +722,7 @@ elif selected_tab == "Vehicles":
 elif selected_tab == "CheckIN/OUT":  
     
     ## Menu Tabs 
-    check_expand = ['IN', 'OUT', 'Reserve' ]
+    check_expand = ['CheckIN', 'CheckOUT', 'Reserve' ]
     
     check_tab = option_menu(
       menu_title=None,
@@ -723,7 +732,7 @@ elif selected_tab == "CheckIN/OUT":
     )
     
    
-    if check_tab == "IN":
+    if check_tab == "CheckIN":
     
         
         license_plate = st.text_input("License Plate:")
@@ -738,7 +747,7 @@ elif selected_tab == "CheckIN/OUT":
             else:
                 st.error("Please fill out all fields.")
                 
-    elif check_tab == 'OUT':
+    elif check_tab == 'CheckOUT':
     
         st.subheader('Checked-In Vehicles')
         checked_in_vehicles = get_checked_in_vehicles(conn)
