@@ -713,7 +713,7 @@ elif selected_tab == "Vehicles":
 elif selected_tab == "CheckIN/OUT":  
     
     ## Menu Tabs 
-    check_expand = ['CheckIN', 'CheckOUT', 'Reserve' ]
+    check_expand = ['IN', 'OUT', 'Reserve' ]
     
     check_tab = option_menu(
       menu_title=None,
@@ -723,7 +723,7 @@ elif selected_tab == "CheckIN/OUT":
     )
     
    
-    if check_tab == "CheckIN":
+    if check_tab == "IN":
     
         
         license_plate = st.text_input("License Plate:")
@@ -738,7 +738,7 @@ elif selected_tab == "CheckIN/OUT":
             else:
                 st.error("Please fill out all fields.")
                 
-    elif check_tab == 'CheckOUT':
+    elif check_tab == 'OUT':
     
         st.subheader('Checked-In Vehicles')
         checked_in_vehicles = get_checked_in_vehicles(conn)
