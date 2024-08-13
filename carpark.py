@@ -265,7 +265,7 @@ class VehicleManagement:
         """Fetches available parking slots from the database."""
         query = "SELECT slot_number FROM ParkingSlots WHERE status = 'available'"
         try:
-            c = self.db_model.conn.cursor()
+            c = self.db.conn.cursor()
             c.execute(query)
             slots = [row[0] for row in c.fetchall()]
             return slots
