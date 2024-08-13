@@ -7,6 +7,7 @@ import pytz
 class Database:
     def __init__(self, db_file):
         self.conn = self.create_connection(db_file)
+        self.create_tables()
 
     def create_connection(self, db_file):
         try:
@@ -15,7 +16,129 @@ class Database:
         except Error as e:
             print(e)
         return None
+        
+    def create_tables(self):
+        try:
+            c = self.conn.cursor()
 
+            # Create Vehicles table
+            c.execute('''
+            CREATE TABLE IF NOT EXISTS Vehicles (
+                id INTEGER PRIMARY KEY,
+                license_plate TEXT UNIQUE,
+                vehicle_type TEXT
+            )
+            ''')
+
+            # Create VehicleMovements table
+            c.execute('''
+            CREATE TABLE IF NOT EXISTS VehicleMovements (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                license_plate TEXT,
+                owner_gender TEXT,
+                checked_in BOOLEAN DEFAULT FALSE,
+                checked_out BOOLEAN DEFAULT FALSE,
+                checkin_time TEXT,
+                checkout_time TEXT,
+                passengers TEXT,
+                FOREIGN KEY (license_plate) REFERENCES Vehicles(license_plate)
+            )
+            ''')
+
+            # Create Transactions table
+            c.execute('''
+            CREATE TABLE IF NOT EXISTS Transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                vehicle_id INTEGER NOT NULL,
+                slot_id INTEGER NOT NULL,
+                entry_time TEXT NOT NULL,
+                exit_time TEXT,
+                FOREIGN KEY (vehicle_id) REFERENCES Vehicles (id),
+                FOREIGN KEY (slot_id) REFERENCES ParkingSlots (id)
+            )
+            ''')
+
+            # Create Users table
+            c.execute('''
+            CREATE TABLE IF NOT EXISTS Users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL UNIQUE,
+                password TEXT NOT NULL,
+                role TEXT NOT NULL
+            )
+            ''')
+
+            # Create Payments table
+            c.execute('''
+            CREATE TABLE IF NOT EXISTS Payments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                transaction_id INTEGER NOT NULL,
+                amount REAL NOT NULL,
+                payment_time TEXT NOT NULL,
+                FOREIGN KEY (transaction_id) REFERENCES Transactions (id)
+            )
+            ''')
+
+            # Create Car Models table
+            c.execute('''
+            CREATE TABLE IF NOT EXISTS car_models (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                brand TEXT NOT NULL,
+                model TEXT NOT NULL
+            )
+            ''')
+
+            # Create Reservations table
+            c.execute('''
+            CREATE TABLE IF NOT EXISTS Reservations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                license_plate TEXT NOT NULL,
+                reservation_start TIMESTAMP NOT NULL,
+                reservation_end TIMESTAMP NOT NULL,
+                slot_number INTEGER NOT NULL,
+                reserved_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                status TEXT DEFAULT 'active'
+            )
+            ''')
+
+            # Create Parking Slots table
+            c.execute('''
+            CREATE TABLE IF NOT EXISTS ParkingSlots (
+                slot_number INTEGER PRIMARY KEY,
+                status TEXT DEFAULT 'available'
+            )
+            ''')
+
+            # Prepopulate car models table
+            car_models = [
+                ('Toyota', 'Corolla'), ('Toyota', 'Camry'), ('Toyota', 'RAV4'),
+                ('Honda', 'Civic'), ('Honda', 'Accord'), ('Honda', 'CR-V'),
+                ('Ford', 'Focus'), ('Ford', 'Fusion'), ('Ford', 'Mustang'),
+                ('Chevrolet', 'Malibu'), ('Chevrolet', 'Cruze'), ('Chevrolet', 'Equinox'),
+                ('Nissan', 'Altima'), ('Nissan', 'Sentra'), ('Nissan', 'Maxima'),
+                ('BMW', '3 Series'), ('BMW', '5 Series'), ('BMW', '7 Series'),
+                ('Mercedes-Benz', 'C-Class'), ('Mercedes-Benz', 'E-Class'), ('Mercedes-Benz', 'S-Class'),
+                ('Audi', 'A3'), ('Audi', 'A4'), ('Audi', 'A6'),
+                ('Volkswagen', 'Golf'), ('Volkswagen', 'Passat'), ('Volkswagen', 'Jetta'),
+                ('Hyundai', 'Elantra'), ('Hyundai', 'Sonata'), ('Hyundai', 'Tucson'),
+                ('Kia', 'Optima'), ('Kia', 'Forte'), ('Kia', 'Sportage'),
+                ('Subaru', 'Impreza'), ('Subaru', 'Legacy'), ('Subaru', 'Outback'),
+                ('Tesla', 'Model S'), ('Tesla', 'Model 3'), ('Tesla', 'Model X')
+            ]
+            c.executemany('INSERT INTO car_models (brand, model) VALUES (?, ?)', car_models)
+
+            # Prepopulate parking slots table
+            parking_slots = [
+                (1, 'available'), (2, 'available'), (3, 'available'), (4, 'available'), (5, 'available'),
+                (6, 'available'), (7, 'available'), (8, 'available'), (9, 'available'), (10, 'available')
+            ]
+            c.executemany('INSERT INTO ParkingSlots (slot_number, status) VALUES (?, ?)', parking_slots)
+
+            self.conn.commit()
+
+        except sqlite3.Error as e:
+            print(f"An error occurred while creating the tables: {e}")
+            
     def close_connection(self):
         if self.conn:
             self.conn.close()
