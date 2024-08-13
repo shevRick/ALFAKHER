@@ -241,6 +241,6 @@ class ParkingManagementApp:
             pass
 
 if __name__ == '__main__':
-    db = Database("parking_management.db")
+    db = Database("car_park_management.db")
     vehicle_mgmt = VehicleManagement(db)
     ParkingManagementApp(vehicle_mgmt)
