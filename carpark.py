@@ -202,74 +202,61 @@ class ParkingManagementApp:
         else:
             st.info("No vehicles found.")
 
-    ## Menu Tabs 
-    check_expand = ['IN', 'OUT', 'Reserve' ]
-    
-    check_tab = option_menu(
-      menu_title=None,
-      options=check_expand,
-      icons=['check-circle', 'door-open', 'calendar-check'],
-      orientation='horizontal'
-    )
-    
-   
-    if check_tab == "IN":
-    
-        
-        license_plate = st.text_input("License Plate:")
-        vehicle_type = st.selectbox("Vehicle Model:", get_model(conn))
-        owner_gender = st.selectbox("Driver Gender:", ["Male", "Female"])
-        passengers = st.selectbox("Passengers:", ["Y", "N"])
-        
-        if st.button('Check-IN'):
-            if license_plate and vehicle_type and owner_gender:
-                insert_vehicle_and_checkin(conn, license_plate, vehicle_type, owner_gender,passengers)
-                
-            else:
-                st.error("Please fill out all fields.")
-                
-    elif check_tab == 'OUT':
-    
-        st.subheader('Checked-In Vehicles')
-        checked_in_vehicles = get_checked_in_vehicles(conn)
-    
-        # Display search bar
-        search_query = st.text_input("Search Checked-In Vehicles")
+    def check_in_out(self):
+        check_expand = ['IN', 'OUT', 'Reserve']
+        check_tab = option_menu(
+            menu_title=None,
+            options=check_expand,
+            icons=['check-circle', 'door-open', 'calendar-check'],
+            orientation='horizontal'
+        )
 
-        if not checked_in_vehicles.empty:
-            # Filter dataframe based on search query
-            if search_query:
-                filtered_vehicles = checked_in_vehicles[checked_in_vehicles.apply(lambda row: search_query.lower() in row.to_string().lower(), axis=1)]
-                st.dataframe(filtered_vehicles, use_container_width=True)
-                st.session_state['searched_vehicle'] = search_query
-            else:
-                st.dataframe(checked_in_vehicles, use_container_width=True)
-        else:
-            st.info("No vehicles are currently checked in.")
+        if check_tab == "IN":
+            license_plate = st.text_input("License Plate:")
+            vehicle_type = st.selectbox("Vehicle Model:", self.vehicle_management.get_vehicle_models())
+            owner_gender = st.selectbox("Driver Gender:", ["Male", "Female"])
+            passengers = st.selectbox("Passengers:", ["Y", "N"])
 
-        # Display update button if a vehicle has been searched
-        if st.session_state['searched_vehicle'] is not None:
-            #st.subheader('Update Vehicle Checkout')
-            if st.button('Checkout'):
-                update_vehicle_checkout(conn, search_query)
-                st.session_state['searched_vehicle'] = None
-                
-                
-    else:
-    
-    
+            if st.button('Check-IN'):
+                if license_plate and vehicle_type and owner_gender:
+                    result = self.vehicle_management.insert_vehicle_and_checkin(license_plate, vehicle_type, owner_gender, passengers, None)
+                    st.success(result)
+                else:
+                    st.error("Please fill out all fields.")
+
+        elif check_tab == 'OUT':
+            st.subheader('Checked-In Vehicles')
+            checked_in_vehicles = self.vehicle_management.get_checked_in_vehicles()
+
+            search_query = st.text_input("Search Checked-In Vehicles")
+
+            if not checked_in_vehicles.empty:
+                if search_query:
+                    filtered_vehicles = checked_in_vehicles[checked_in_vehicles.apply(lambda row: search_query.lower() in row.to_string().lower(), axis=1)]
+                    st.dataframe(filtered_vehicles, use_container_width=True)
+                    st.session_state['searched_vehicle'] = search_query
+                else:
+                    st.dataframe(checked_in_vehicles, use_container_width=True)
+            else:
+                st.info("No vehicles are currently checked in.")
+
+            if 'searched_vehicle' in st.session_state and st.session_state['searched_vehicle']:
+                if st.button('Checkout'):
+                    result = self.vehicle_management.update_vehicle_checkout(st.session_state['searched_vehicle'])
+                    st.success(result)
+                    st.session_state['searched_vehicle'] = None
+
+        elif check_tab == 'Reserve':
             reserve_expand = ['Reservations', 'Add', 'Cancel']
             reserve_tab = st.selectbox("Select Reservation Operation", reserve_expand)
-            
+
             if reserve_tab == "Reservations":
                 st.subheader('All Reservations')
-                reservations = get_all_reservations(conn)
-                
-                # Display search bar
+                reservations = self.vehicle_management.get_all_reservations()
+
                 search_query = st.text_input("Search Reservations")
 
                 if not reservations.empty:
-                    # Filter dataframe based on search query
                     if search_query:
                         filtered_reservations = reservations[reservations.apply(lambda row: search_query.lower() in row.to_string().lower(), axis=1)]
                         st.dataframe(filtered_reservations, use_container_width=True)
@@ -277,14 +264,12 @@ class ParkingManagementApp:
                         st.dataframe(reservations, use_container_width=True)
                 else:
                     st.info("No reservations found.")
-                
+
             elif reserve_tab == "Add":
-                # Add parking reservation
                 st.subheader('Reserve Parking Slot')
-                
-                available_slots = get_available_slots(conn)
+                available_slots = self.vehicle_management.get_available_slots()
+
                 if available_slots:
-                
                     reservation_license_plate = st.text_input('License Plate for Reservation')
                     reservation_start = st.date_input('Reservation Start Date')
                     reservation_start_time = st.time_input('Reservation Start Time')
@@ -295,43 +280,36 @@ class ParkingManagementApp:
                     if st.button('Add Reservation'):
                         start_datetime = datetime.combine(reservation_start, reservation_start_time).strftime('%Y-%m-%d %H:%M:%S')
                         end_datetime = datetime.combine(reservation_end, reservation_end_time).strftime('%Y-%m-%d %H:%M:%S')
-                        
-                        add_reservation(conn, reservation_license_plate, start_datetime, end_datetime, slot_number)
+                        result = self.vehicle_management.add_reservation(reservation_license_plate, start_datetime, end_datetime, slot_number)
+                        st.success(result)
                 else:
-                
                     st.write("No available slots")
-            
-                
-            else:
-            
+
+            elif reserve_tab == "Cancel":
                 st.subheader('Cancel Reservations')
-                reservations = get_all_reservations(conn)
-                
-                # Display search bar
+                reservations = self.vehicle_management.get_all_reservations()
+
                 search_query = st.text_input("Search Reservations")
 
                 if not reservations.empty:
-                    # Filter dataframe based on search query
                     if search_query:
                         filtered_reservations = reservations[reservations.apply(lambda row: search_query.lower() in row.to_string().lower(), axis=1)]
                         st.dataframe(filtered_reservations, use_container_width=True)
                         st.session_state['searched_vehicle'] = search_query
                         st.session_state['slot_number'] = filtered_reservations.iloc[0]['slot_number']
                     else:
-                        st.dataframe(reservations, use_container_width=True)    
-                        
+                        st.dataframe(reservations, use_container_width=True)
                 else:
                     st.info("No reservations found.")
-                       
-                 # Display update button if a vehicle has been searched
-                if st.session_state['searched_vehicle'] is not None:
-                    #st.subheader('Update Vehicle Checkout')
+
+                if 'searched_vehicle' in st.session_state and st.session_state['searched_vehicle']:
                     if st.button('Cancel'):
                         slot_number = int(st.session_state['slot_number'])
-                        cancel_reservation(conn, st.session_state['searched_vehicle'], slot_number)
-                        
+                        result = self.vehicle_management.cancel_reservation(st.session_state['searched_vehicle'], slot_number)
+                        st.success(result)
                         st.session_state['slot_number'] = None
                         st.session_state['searched_vehicle'] = None
+
 
 if __name__ == '__main__':
     db = Database("car_park_management.db")
