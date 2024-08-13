@@ -261,6 +261,18 @@ class VehicleManagement:
     def update_slot_status(self, slot_number, status):
         self.db.execute_query("UPDATE ParkingSlots SET status=? WHERE slot_number=?", (status, slot_number))
 
+    def get_available_slots(self):
+        """Fetches available parking slots from the database."""
+        query = "SELECT slot_number FROM ParkingSlots WHERE status = 'available'"
+        try:
+            c = self.db_model.conn.cursor()
+            c.execute(query)
+            slots = [row[0] for row in c.fetchall()]
+            return slots
+        except sqlite3.Error as e:
+            print(f"An error occurred while fetching available slots: {e}")
+            return []
+
 import streamlit as st
 from streamlit_option_menu import option_menu
 import os
