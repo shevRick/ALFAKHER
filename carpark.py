@@ -173,6 +173,18 @@ class VehicleManagement:
         self.db = database
         self.local_tz = pytz.timezone('Africa/Nairobi')
 
+     def get_vehicle_models(self):
+        """Fetches vehicle models from the database."""
+        query = "SELECT brand || ' ' || model AS full_model FROM car_models"
+        try:
+            c = self.db_model.conn.cursor()
+            c.execute(query)
+            models = [row[0] for row in c.fetchall()]
+            return models
+        except sqlite3.Error as e:
+            print(f"An error occurred while fetching vehicle models: {e}")
+            return []
+
     def insert_vehicle_and_checkin(self, license_plate, vehicle_type, owner_gender, passengers, image_path):
         vehicle = self.db.fetch_all("SELECT * FROM Vehicles WHERE license_plate = ?", (license_plate,))
         if not vehicle:
