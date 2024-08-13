@@ -173,7 +173,7 @@ class VehicleManagement:
         self.db = database
         self.local_tz = pytz.timezone('Africa/Nairobi')
 
-     def get_vehicle_models(self):
+    def get_vehicle_models(self):
         """Fetches vehicle models from the database."""
         query = "SELECT brand || ' ' || model AS full_model FROM car_models"
         try:
