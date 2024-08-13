@@ -177,7 +177,7 @@ class VehicleManagement:
         """Fetches vehicle models from the database."""
         query = "SELECT brand || ' ' || model AS full_model FROM car_models"
         try:
-            c = self.db_model.conn.cursor()
+            c = self.db.conn.cursor()
             c.execute(query)
             models = [row[0] for row in c.fetchall()]
             return models
