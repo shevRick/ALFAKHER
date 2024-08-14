@@ -166,7 +166,8 @@ def main():
     staff_view = StaffView()
     staff_controller = StaffAllocationController(staff_model, staff_view)
     
-   
+    # Process and display staff registration
+    staff_controller.register_new_staff()
 
     # Process and display staff allocations
     staff_controller.process_staff_allocation()
