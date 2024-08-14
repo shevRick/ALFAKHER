@@ -79,8 +79,8 @@ class StaffModel:
                 role TEXT,
                 shift TEXT,
                 shift_date DATE,
-                start_time TIME,
-                end_time TIME,
+                start_time DATETIME,
+                end_time DATETIME,
                 allocation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (staff_id) REFERENCES staff(id)
             )
