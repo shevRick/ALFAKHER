@@ -121,10 +121,12 @@ class StaffModel:
     def fetch_staff_allocations(self):
         """Fetches current staff allocations from the database."""
         query = '''
-            SELECT s.name, sa.role, sa.shift, sa.shift_date, sa.start_time, sa.end_time 
+            SELECT s.name, sa.role, sa.shift, sa.shift_date, 
+                   TIME(sa.start_time) AS start_time, 
+                   TIME(sa.end_time) AS end_time
             FROM staff_allocation sa
             JOIN staff s ON sa.staff_id = s.id
-            ORDER BY sa.shift_date DESC, TIME(sa.start_time) DESC
+            ORDER BY sa.shift_date DESC, start_time DESC
         '''
         return pd.read_sql_query(query, self.conn)
 
