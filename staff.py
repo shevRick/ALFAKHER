@@ -103,11 +103,16 @@ class StaffModel:
         """Saves staff allocation to the database."""
         try:
             cursor = self.conn.cursor()
+
+            # Convert time objects to strings
+            start_time_str = start_time.strftime('%H:%M:%S')
+            end_time_str = end_time.strftime('%H:%M:%S')
+
             cursor.execute('''
                 INSERT INTO staff_allocation 
                 (staff_id, role, shift, shift_date, start_time, end_time) 
                 VALUES (?, ?, ?, ?, ?, ?)
-            ''', (staff_id, role, shift, shift_date, start_time, end_time))
+            ''', (staff_id, role, shift, shift_date, start_time_str, end_time_str))
             self.conn.commit()
             st.success(f"Staff allocation saved successfully!")
         except sqlite3.Error as e:
