@@ -158,6 +158,7 @@ class StaffAllocationController:
     def display_staff_allocations(self):
         """Displays the current staff allocations."""
         staff_allocations = self.model.fetch_staff_allocations()
+        st.write(staff_allocations)  # Debugging: Print the DataFrame to see the contents
         self.view.render_staff_allocation_list(staff_allocations)
 
         
