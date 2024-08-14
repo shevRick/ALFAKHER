@@ -103,30 +103,25 @@ class StaffModel:
         """Saves staff allocation to the database."""
         try:
             cursor = self.conn.cursor()
-
-            # Convert time objects to strings
-            start_time_str = start_time.strftime('%H:%M:%S')
-            end_time_str = end_time.strftime('%H:%M:%S')
-
+    
+            # No need to convert to string; SQLite will handle it
             cursor.execute('''
                 INSERT INTO staff_allocation 
                 (staff_id, role, shift, shift_date, start_time, end_time) 
                 VALUES (?, ?, ?, ?, ?, ?)
-            ''', (staff_id, role, shift, shift_date, start_time_str, end_time_str))
+            ''', (staff_id, role, shift, shift_date, start_time, end_time))
             self.conn.commit()
-            st.success(f"Staff allocation saved successfully!")
+            st.success("Staff allocation saved successfully!")
         except sqlite3.Error as e:
             st.error(f"An error occurred while saving staff allocation: {e}")
-
+    
     def fetch_staff_allocations(self):
         """Fetches current staff allocations from the database."""
         query = '''
-            SELECT s.name, sa.role, sa.shift, sa.shift_date, 
-                   TIME(sa.start_time) AS start_time, 
-                   TIME(sa.end_time) AS end_time
+            SELECT s.name, sa.role, sa.shift, sa.shift_date, sa.start_time, sa.end_time 
             FROM staff_allocation sa
             JOIN staff s ON sa.staff_id = s.id
-            ORDER BY sa.shift_date DESC, start_time DESC
+            ORDER BY sa.shift_date DESC, sa.start_time DESC
         '''
         return pd.read_sql_query(query, self.conn)
 
