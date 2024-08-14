@@ -123,8 +123,8 @@ class StaffModel:
         query = '''
             SELECT s.name, sa.role, sa.shift, sa.shift_date, sa.start_time, sa.end_time 
             FROM staff_allocation sa
-            JOIN staff s ON sa.staff_id = s.employee_id
-            ORDER BY sa.shift_date DESC, sa.start_time DESC
+            JOIN staff s ON sa.staff_id = s.id
+            ORDER BY sa.shift_date DESC, TIME(sa.start_time) DESC
         '''
         return pd.read_sql_query(query, self.conn)
 
