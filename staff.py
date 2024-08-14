@@ -101,13 +101,17 @@ class StaffModel:
 
     def save_staff_allocation(self, staff_id, role, shift, shift_date, start_time, end_time):
         """Saves staff allocation to the database."""
-        cursor = self.conn.cursor()
-        cursor.execute('''
-            INSERT INTO staff_allocation 
-            (staff_id, role, shift, shift_date, start_time, end_time) 
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (staff_id, role, shift, shift_date, start_time, end_time))
-        self.conn.commit()
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                INSERT INTO staff_allocation 
+                (staff_id, role, shift, shift_date, start_time, end_time) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (staff_id, role, shift, shift_date, start_time, end_time))
+            self.conn.commit()
+            st.success(f"Staff allocation saved successfully!")
+        except sqlite3.Error as e:
+            st.error(f"An error occurred while saving staff allocation: {e}")
 
     def fetch_staff_allocations(self):
         """Fetches current staff allocations from the database."""
