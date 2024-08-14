@@ -81,13 +81,54 @@ class StaffAllocationController:
         """Displays the current staff allocations."""
         staff_allocations = self.model.fetch_staff_allocations()
         self.view.render_staff_allocation_list(staff_allocations)
+        
+class Database:
+    def __init__(self, db_file):
+        self.conn = self.create_connection(db_file)
 
+    def create_connection(self, db_file):
+        try:
+            conn = sqlite3.connect(db_file)
+            return conn
+        except Error as e:
+            print(e)
+        return None
+
+    def close_connection(self):
+        if self.conn:
+            self.conn.close()
+
+    def execute_query(self, query, params=()):
+        try:
+            c = self.conn.cursor()
+            c.execute(query, params)
+            self.conn.commit()
+        except Error as e:
+            print(e)
+
+    def fetch_all(self, query, params=()):
+        try:
+            c = self.conn.cursor()
+            c.execute(query, params)
+            rows = c.fetchall()
+            return rows
+        except Error as e:
+            print(e)
+            return []
+
+    def fetch_dataframe(self, query):
+        try:
+            return pd.read_sql_query(query, self.conn)
+        except Error as e:
+            print(e)
+            return pd.DataFrame()
+            
 def main():
     st.set_page_config(page_title="Vehicle Check-In System", layout="wide")
     
     # Initialize the Model, View, and Controller for vehicle check-ins
-    conn = sqlite3.connect("your_database.db")
-    vehicle_model = DataModel(conn)
+    conn = sqlite3.connect("car_park_management.db")
+    vehicle_model = Database(conn)
     vehicle_view = DashboardView()
     vehicle_controller = VehicleCheckinController(vehicle_model, vehicle_view)
 
