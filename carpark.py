@@ -360,16 +360,22 @@ class ParkingManagementApp:
 
         if check_tab == "IN":
             license_plate = st.text_input("License Plate:")
-            vehicle_type = st.selectbox("Vehicle Model:", self.vehicle_management.get_vehicle_models())
+            vehicle_type = st.selectbox("Vehicle Model:", [])  # Needs to be populated with models
             owner_gender = st.selectbox("Driver Gender:", ["Male", "Female"])
             passengers = st.selectbox("Passengers:", ["Y", "N"])
+            vehicle_image = st.camera_input("Take a picture of the vehicle")
 
             if st.button('Check-IN'):
-                if license_plate and vehicle_type and owner_gender:
-                    result = self.vehicle_management.insert_vehicle_and_checkin(license_plate, vehicle_type, owner_gender, passengers, None)
+                if license_plate and vehicle_type and owner_gender and vehicle_image:
+                    image_path = f"vehicle_images/{license_plate}.png"
+                    os.makedirs("vehicle_images", exist_ok=True)
+                    with open(image_path, "wb") as f:
+                        f.write(vehicle_image.getvalue())
+
+                    result = self.vehicle_management.insert_vehicle_and_checkin(license_plate, vehicle_type, owner_gender, passengers, image_path)
                     st.success(result)
                 else:
-                    st.error("Please fill out all fields.")
+                    st.error('Please provide all required information.')
 
         elif check_tab == 'OUT':
             st.subheader('Checked-In Vehicles')
