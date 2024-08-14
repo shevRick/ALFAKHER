@@ -1,3 +1,13 @@
+import streamlit as st
+import sqlite3
+import pandas as pd
+from sqlite3 import Error
+from datetime import datetime, timedelta
+from streamlit_option_menu import option_menu
+import os
+import altair as alt
+import pytz
+
 def main():
     st.set_page_config(page_title="Vehicle Check-In System", layout="wide")
     
