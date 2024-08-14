@@ -127,8 +127,8 @@ def main():
     st.set_page_config(page_title="Vehicle Check-In System", layout="wide")
     
     # Initialize the Model, View, and Controller for vehicle check-ins
-    conn = sqlite3.connect("car_park_management.db")
-    vehicle_model = Database(conn)
+    db = Database("car_park_management.db")
+    vehicle_model = Database(db)
     vehicle_view = DashboardView()
     vehicle_controller = VehicleCheckinController(vehicle_model, vehicle_view)
 
