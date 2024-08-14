@@ -128,8 +128,6 @@ class StaffModel:
         '''
         return pd.read_sql_query(query, self.conn)
 
-        return pd.read_sql_query(query, self.conn)
-
 class StaffAllocationController:
     """Handles the logic for staff management and allocation."""
 
