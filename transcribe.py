@@ -2,20 +2,30 @@ import streamlit as st
 import whisper
 from io import BytesIO
 from moviepy.editor import VideoFileClip
+import tempfile
+import os
 
 # Load the Whisper model
 model = whisper.load_model("base")
 
 def extract_audio_from_video(video_file):
+    # Create a temporary file to save the uploaded video file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video_file:
+        temp_video_file.write(video_file.getbuffer())
+        temp_video_path = temp_video_file.name
+
     # Load video file using moviepy
-    video = VideoFileClip(video_file)
+    video = VideoFileClip(temp_video_path)
     
     # Extract the audio
-    audio = video.audio
-    audio_file = "extracted_audio.wav"
-    audio.write_audiofile(audio_file, codec='pcm_s16le')  # Save as WAV
+    audio_file_path = tempfile.NamedTemporaryFile(delete=False, suffix=".wav").name
+    video.audio.write_audiofile(audio_file_path, codec='pcm_s16le')  # Save as WAV
+
+    # Clean up the temporary video file
+    video.close()
+    os.remove(temp_video_path)
     
-    return audio_file
+    return audio_file_path
 
 # Streamlit app
 st.title("Audio/Video Transcription with Whisper")
@@ -31,12 +41,18 @@ if uploaded_file is not None:
         with st.spinner("Extracting audio from video..."):
             audio_file_path = extract_audio_from_video(uploaded_file)
     else:
-        audio_file_path = uploaded_file
+        # Save the uploaded audio file as a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio_file:
+            temp_audio_file.write(uploaded_file.getbuffer())
+            audio_file_path = temp_audio_file.name
 
     # Transcribe the audio file
     with st.spinner("Transcribing..."):
         result = model.transcribe(audio_file_path)
         transcription = result['text']
+
+    # Clean up the temporary audio file
+    os.remove(audio_file_path)
 
     # Display the transcription
     st.header("Transcription:")
