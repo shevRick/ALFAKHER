@@ -1,13 +1,13 @@
 import streamlit as st
-import whisper
+import whisperx
 from io import BytesIO
 from moviepy.editor import VideoFileClip
 import tempfile
 import os
 from pydub import AudioSegment
 
-# Load the Whisper model
-model = whisper.load_model("base")
+# Load the WhisperX model
+model = whisperx.load_model("base")
 
 def extract_audio_from_video(video_file):
     # Create a temporary file to save the uploaded video file
