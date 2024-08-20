@@ -5,3 +5,4 @@ pytz
 streamlit_option_menu
 openai-whisper
 torch
+moviepy
