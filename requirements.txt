@@ -7,3 +7,4 @@ openai-whisper
 torch
 moviepy
 ffmpeg-python
+pydub
