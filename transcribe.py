@@ -4,7 +4,7 @@ from io import BytesIO
 from moviepy.editor import VideoFileClip
 import tempfile
 import os
-import subprocess
+from pydub import AudioSegment
 
 # Load the Whisper model
 model = whisper.load_model("base")
@@ -30,8 +30,9 @@ def extract_audio_from_video(video_file):
 
 def convert_to_wav(input_path):
     output_path = tempfile.NamedTemporaryFile(delete=False, suffix=".wav").name
-    command = ["ffmpeg", "-i", input_path, "-ac", "1", "-ar", "16000", output_path]
-    subprocess.run(command, check=True)
+    audio = AudioSegment.from_file(input_path)
+    audio = audio.set_channels(1).set_frame_rate(16000)
+    audio.export(output_path, format="wav")
     return output_path
 
 # Streamlit app
