@@ -3,3 +3,5 @@ pandas
 altair
 pytz
 streamlit_option_menu
+openai-whisper
+torch
