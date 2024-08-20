@@ -4,6 +4,7 @@ from io import BytesIO
 from moviepy.editor import VideoFileClip
 import tempfile
 import os
+import subprocess
 
 # Load the Whisper model
 model = whisper.load_model("base")
@@ -27,6 +28,12 @@ def extract_audio_from_video(video_file):
     
     return audio_file_path
 
+def convert_to_wav(input_path):
+    output_path = tempfile.NamedTemporaryFile(delete=False, suffix=".wav").name
+    command = ["ffmpeg", "-i", input_path, "-ac", "1", "-ar", "16000", output_path]
+    subprocess.run(command, check=True)
+    return output_path
+
 # Streamlit app
 st.title("Audio/Video Transcription with Whisper")
 
@@ -42,9 +49,13 @@ if uploaded_file is not None:
             audio_file_path = extract_audio_from_video(uploaded_file)
     else:
         # Save the uploaded audio file as a temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio_file:
+        with tempfile.NamedTemporaryFile(delete=False) as temp_audio_file:
             temp_audio_file.write(uploaded_file.getbuffer())
             audio_file_path = temp_audio_file.name
+
+    # Convert to WAV format if necessary
+    with st.spinner("Converting audio to WAV format..."):
+        audio_file_path = convert_to_wav(audio_file_path)
 
     # Transcribe the audio file
     with st.spinner("Transcribing..."):
